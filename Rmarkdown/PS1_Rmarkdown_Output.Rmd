@@ -1,0 +1,343 @@
+---
+title: "PS1_Rmarkdown_Output"
+author: "Dane Dewees"
+date: "`r date()`"
+output_format: pdf_document
+---
+
+
+
+
+```{r echo=FALSE}
+#Color Format - `r colFmt("green TEXT",'green')`
+library(knitr)
+colFmt = function(x,color){
+  outputFormat = opts_knit$get("rmarkdown.pandoc.to")
+  if(outputFormat == 'latex')
+    paste("\\textcolor{",color,"}{",x,"}",sep="")
+  else if(outputFormat == 'html')
+    paste("<font color='",color,"'>",x,"</font>",sep="")
+  else
+    x
+}
+```
+
+
+**Part 1 – SF-Seq read quality score distributions**
+
+
+`r colFmt("Using FastQC on Talapas, produce plots of quality score distributions for forward and reverse reads. Also, produce plots of the per-base N content, and comment on whether or not they are consistent with the quality score plots.", 'green')`
+
+
+*8_2F_fox_R1: Per Base Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R1_per_base_quality.png){width=550px height 550px}
+
+*8_2F_fox_R1: Per Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R1_per_sequence_quality.png){width=550px height 550px}
+
+*8_2F_fox_R1: Per Base N Content output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R1_per_base_n_content.png){width=550px height 550px}
+
+*8_2F_fox_R1: Per Base Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R2_per_base_quality.png){width=550px height 550px}
+
+
+
+*8_2F_fox_R2: Per Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R2_per_sequence_quality.png){width=550px height 550px}
+
+*8_2F_fox_R2: Per Base N Content output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/8_R2_per_base_n_content.png){width=550px height 550px}
+
+
+*31_4F_fox_R1: Per Base Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R1_per_base_quality.png){width=550px height 550px}
+
+*31_4F_fox_R1: Per Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R1_per_sequence_quality.png){width=550px height 550px}
+
+*31_4F_fox_R1: Per Base N Content output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R1_per_base_n_content.png){width=550px height 550px}
+
+
+*31_4F_fox_R2: Per Base Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R2_per_base_quality.png){width=550px height 550px}
+
+*31_4F_fox_R2: Per Sequence Quality output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R2_per_sequence_quality.png){width=550px height 550px}
+
+*31_4F_fox_R2: Per Base N Content output - FastQC*
+
+![](/Users/Deweesd/Desktop/2017_Bi624/PS1_files/FASTQC_Images/31_R2_per_base_n_content.png){width=550px height 550px}
+
+`r colFmt("comment on whether or not they are consistent with the quality score plots.", 'green')`
+
+From the images above, you can see there were no differences in the per-base N content plots to the q_score distribution plots. All indicating that there were little to no N-content present in the data sets.
+
+
+```{r echo=FALSE, warning=FALSE}
+
+#Reading in each of the mean quality score files relative to base pair position
+R1_314F_mean = read.delim("31_R1_mean_score_bp.txt", header = TRUE)
+R2_314F_mean = read.delim("31_R2_mean_score_bp.txt", header = TRUE)
+R1_82F_mean = read.delim("8_2F_R1_mean_score_bp.txt", header = TRUE)
+R2_82F_mean = read.delim("8_2F_R2_mean_score_bp.txt", header = TRUE)
+
+
+#Reading in each of the frequency distribution data sets and setting header names to values below
+R1_82F_freq = read.delim("8_2F_R1_freq.txt", row.names = NULL, col.names = c("Mean", "Frequency"))
+R2_82F_freq = read.delim("8_2F_R2_freq.txt", row.names = NULL, col.names = c("Mean", "Frequency"))
+R1_314F_freq = read.delim("31_4F_R1_freq.txt", row.names = NULL, col.names = c("Mean", "Frequency"))
+R2_314F_freq = read.delim("31_4F_R2_freq.txt", row.names = NULL, col.names = c("Mean", "Frequency"))
+
+
+#Reading in trimmmed adapater seqeunce data sets
+R1_314F_trimmed = read.table("31_R1_read_length.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R2_314F_trimmed = read.table("31_4F_R2_read_length.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R1_82F_trimmed = read.table("8_2F_R1_read_length.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R2_82F_trimmed = read.table("8_2F_R2_read_length.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+
+R1_314F_cutadapt = read.table("cutadapt_314F_R1.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R2_314F_cutadapt = read.table("cutadapt_314F_R2.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R1_82F_cutadapt = read.table("cutadapt_82F_R1.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+R2_82F_cutadapt = read.table("cutadapt_82F_R2.txt", header = FALSE, col.names = c("Frequency", "Read Length"))
+```
+
+
+`r colFmt("*Plotting mean QS per base pair posiiton data sets from my script*", 'green')`
+```{r echo=FALSE}
+par(las=1, mfrow=c(2,2), cex.main=0.75, font.lab=3)
+
+
+plot(R1_314F_mean[,1],  ylim=c(30,40), ylab="Mean quality score", xlab="BP position", main="Mean quality score 31_4F_R1", col = "steelblue", font.lab=2)
+plot(R2_314F_mean[,1], ylim=c(30,40), ylab="Mean quality score", xlab="BP position", main="Mean quality score 31_4F_R2", col = "green", font.lab=2)
+plot(R1_82F_mean[,1], ylim=c(30,40), ylab="Mean quality score", xlab="BP position", main="Mean quality score 8_2F_R1", col = "black", font.lab=2)
+plot(R2_82F_mean[,1], ylim=c(30,40), ylab="Mean quality score", xlab="BP position", main="Mean quality score 8_2F_R2", col = "red", font.lab=2)
+```
+
+
+`r colFmt("*Plotting frequency distribution per QS data sets from my script*", 'green')`
+```{r echo=FALSE}
+par(las=1, mfrow=c(2,2), cex.main=0.75, font.lab=3)
+
+R1_82F_freq$bin = cut(R1_82F_freq$Mean,breaks = c(12,16,21,26,31,36,41))
+R1_new = aggregate(Frequency ~ bin, data=R1_82F_freq, sum)
+barplot(R1_new$Frequency, space=0, width=1, xlim=c(0,6), ylim=c(0,5e+07), ylab="Frequency", xlab="Average q_score per read", col="steelblue", main="Distribution of avg quality scores 8_2F_fox R1", cex.axis = 0.7)
+
+#setting variable lables on x and y axis and adjusting size of axis labels with cex.axis
+axis(1, at = 0:6, labels = c(12,16,21,26,31,36,41), cex.axis=0.7)
+
+
+R2_82F_freq$bin = cut(R2_82F_freq$Mean,breaks = c(12,16,21,26,31,36,41))
+R2_new = aggregate(Frequency ~ bin, data=R2_82F_freq, sum)
+barplot(R2_new$Frequency, space=0, width=1, xlim=c(0,6), ylim=c(0,5e+07), ylab="Frequency", xlab="Average q_score per read", col="grey", main="Distribution of avg quality scores 8_2F_fox R2", cex.axis = 0.7)
+axis(1, at = 0:6, labels = c(12,16,21,26,31,36,41), cex.axis=0.7)
+
+
+R1_314F_freq$bin = cut(R1_314F_freq$Mean,breaks = c(12,16,21,26,31,36,41))
+R1_314F_new = aggregate(Frequency ~ bin, data=R1_314F_freq, sum)
+barplot(R1_314F_new$Frequency, space=0, width=1, xlim=c(0,6), ylim=c(0,5e+06), ylab="Frequency", xlab="Average q_score per read", col="green", main="Distribution of avg quality scores 31_4F_fox R1", cex.axis = 0.7)
+axis(1, at = 0:6, labels = c(12,16,21,26,31,36,41), cex.axis=0.7)
+
+R2_314F_freq$bin = cut(R2_314F_freq$Mean,breaks = c(12,16,21,26,31,36,41))
+R2_314F_new = aggregate(Frequency ~ bin, data=R2_314F_freq, sum)
+barplot(R2_314F_new$Frequency, space=0, width=1, xlim=c(0,6), ylim=c(0,5e+06), ylab="Frequency", xlab="Average q_score per read", col="red", main="Distribution of avg quality scores 31_4F_fox R2", cex.axis = 0.7)
+axis(1, at = 0:6, labels = c(12,16,21,26,31,36,41), cex.axis=0.7)
+```
+
+
+`r colFmt("Describe how the FastQC quality score distribution plots compare to your own. If different, propose an explanation. Also, does the runtime differ? If so, why?", 'green')`
+
+  >There seems to be little difference between my plots and the FastQC plots with regards to the mean quality score distrbution across the basepair positions. Each roughly hovered around 39-40 Qscore for the forward         reads and between 37-38 for the reverse reads. This showed that the libraries generated had little to no error probability when run through Illumina sequencing (Reference HTML files uploaded to hithub to                  cross-reference the figures there to the R scripts above). I noticed an error bar difference among the FastQC plots. 
+      
+  >The runtime was rather different when looking at FastQC compared to my python script. FastQC took roughly 00:06:00 for 3 of the 4 data sets (one took around 15 minutes), whereas when ran on my script, the three           files that took 6 minutes took around 15 minutes and the larger files took around 2 hours. I think this is simply do to our python scripts not being optimized and also the FastQC being written in a lnaguage that is        more ideal for these types of processings (JAVA). This, in turn, can produce faster results and generate output quicker than our raw scripts. IF we were able to optimize our scripts, I believe it would not have           taken as long. Overall, there is just a functional difference when looking at JAVA to Python and each utalized for vairous things. 
+
+
+
+**Part 2 - Adaptor Trimming Comparision**
+
+`r colFmt("Look into the adaptor trimming options for cutadapt, process_shortreads, and Trimmomatic (all on Talapas), and briefly describe the differences.", 'green')`
+
+>Cutadapt finds and removes adapter sequences, primers, poly-A tails and other types of unwanted sequence from your high-throughput sequencing reads. It is N-tolerant and it has a default setting that enables up to ~10% error rate
+
+>Process_shortreads will trim reads that are below quality threshold instead of discarding them, making it useful for genomic assembly or other analyses. It requires adapters(barcodes) and can take both forward/reverse reads.
+
+>Trimmomatic performs a variety of useful trimming tasks for illumina paired-end and single ended data.It requires a FASTA file that has the associated adapters.
+
+`r colFmt("*Plots for process_shortreads data sets*", 'green')`
+
+```{r echo=FALSE, warning=F}
+par(mfrow=c(1,2), cex.main=0.75, font.lab=2)
+
+plot(R2_314F_trimmed$Read.Length, R2_314F_trimmed$Frequency, main = "R1_R2 Distribution for 31_4F_fox data (PS)", log = "y", pch = 1, xlab="read length", ylab ="frequency", col="red")
+points(R1_314F_trimmed$Read.Length,R1_314F_trimmed$Frequency, log = "y", pch = 1, xlab="read length", col="blue")
+legend("topleft", legend=c("R1", "R2"), col=c("blue", "red"), pch=1)
+
+plot(R2_82F_trimmed$Read.Length, R2_82F_trimmed$Frequency, main = "R1_R2 Distribution for 8_2F_fox data (PS)", log = "y", type = "p", xlab="read length", ylab ="frequency", col="red")
+points(R1_82F_trimmed$Read.Length,R1_82F_trimmed$Frequency, log = "y", type="p", xlab="read length", col="blue")
+legend("topleft", legend=c("R1", "R2"), col=c("blue", "red"), pch=1)
+```
+
+`r colFmt("*Plots for cutadapt data sets*", 'green')`
+
+```{r echo=FALSE, warning=F}
+par(mfrow=c(1,2), cex.main=0.75, font.lab=2)
+
+plot(R2_314F_cutadapt$Read.Length, R2_314F_cutadapt$Frequency, main = "R1_R2 Distribution for 31_4F_fox data (CA)", log = "y", pch = 1, xlab="read length", ylab ="frequency", col="red")
+points(R1_314F_cutadapt$Read.Length,R1_314F_cutadapt$Frequency, log = "y", pch = 1, xlab="read length", col="blue")
+legend("topleft", legend=c("R1", "R2"), col=c("blue", "red"), pch=1)
+
+plot(R2_82F_cutadapt$Read.Length, R2_82F_cutadapt$Frequency, main = "R1_R2 Distribution for 8_2F_fox data (CA)", log = "y", type = "p", xlab="read length", ylab ="frequency", col="red")
+points(R1_82F_cutadapt$Read.Length,R1_82F_cutadapt$Frequency, log = "y", type="p", xlab="read length", col="blue")
+legend("topleft", legend=c("R1", "R2"), col=c("blue", "red"), pch=1)
+```
+
+
+Given the fact that the average size of BP in our fragment analyzer output file, there shouldn't be much to any adapter contamination. Given that I only found 6% and 12% in my R1/R2 reads for both 8_2F and 31_4F, this matched with the corresponding libraries shown in the fragment analyzer output dataset.
+
+=== Summary 8_2F_fox_R1/R2 data ===
+
+Total read pairs processed:         36,482,601
+  Read 1 with adapter:               2,145,571 (5.9%)
+  Read 2 with adapter:               2,307,693 (6.3%)
+Pairs written (passing filters):    36,482,601 (100.0%)
+
+
+
+=== Summary 31_4F_fox_R1/R2 data ===
+
+Total read pairs processed:          3,788,343
+  Read 1 with adapter:                 456,153 (12.0%)
+  Read 2 with adapter:                 407,186 (10.7%)
+Pairs written (passing filters):     3,788,343 (100.0%)
+
+
+
+**Part 3 - rRNA reads and strand - specificity**
+
+`r colFmt("Align the SF-Seq reads to your mouse rRNA database and report the proportion of reads that likely came from rRNAs.", 'green')`
+
+To determine the proportion of reads that likely originated from rRNA, we can count the number of reads that did NOT map to any rRNA sequences, and subtract that from the total number of reads to determine the portion of reads that did map to rRNA (See equations below)
+
+*31_4F_fox_R1 reads vs total reads in gsnap_out_31_4F_R1.nomapping*
+
+```{r}
+1 - (3720606/3788343) 
+
+
+
+```
+
+*31_4F_fox_R2 reads vs total reads in gsnap_out_31_4F_R2.nomapping*
+
+```{r}
+1 - (3720901/3788343) 
+
+```
+
+
+
+
+*8_2F_fox_R1 reads vs total reads in gsnap_out_8_2F_R1.nomapping*
+
+```{r}
+1 - (35637300/36482601) 
+
+
+```
+
+
+*8_2F_fox_R2 reads vs total reads in gsnap_out_8_2F_R2.nomapping*
+
+```{r}
+1 - (35641880/36482601) 
+
+```
+
+As you can see, each dataset showed roughly 1-2% of all reads likely originated from rRNA based on the gsnap alignment. For the 31_4F_fox library, you see around 1.7% that alligned with rRNA and around 2.3% for the 8_2F_fox library datasets. Our libraries coould potentially be mostly rRNA reads if the polyA selection went poorly during preportation. A cell’s rRNA, in theory, can achieve up to 95% of the total RNA in the cell,  which is the exact reason why we wanted to get rid of it in the first place. Seeing that both libraries are rather low, I'd conclude that the library prep was sucessful. 
+
+`r colFmt("How do we know our library is strand-specific?", 'green')`
+
+The easiest method (which we experienced in Clay's class) was finding out what proporiton of the R1/R2 reads contains a piece of the poly-A tail (targeting homoploymer regions). Since we used a poly-A tail method to target and mark mRNA sequences with the tails, one should find a certain number of reads in either dataset, with it's corresponding set having fewer. The same should be the case for Poly-T tails as well.
+
+*Library for 31_4F_fox_trimmed files*
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_31_4F_fox_R1_001.fastq | grep "AAAAAAAAAAAAAAAAAAAAAAA" | wc -l
+
+**940**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_31_4F_fox_R2_001.fastq | grep "AAAAAAAAAAAAAAAAAAAAAAA" | wc -l
+
+**2124**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_31_4F_fox_R1_001.fastq | grep "TTTTTTTTTTTTTTTTTTTTTTT" | wc -l
+
+**7617**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_31_4F_fox_R2_001.fastq | grep "TTTTTTTTTTTTTTTTTTTTTTT" | wc -l
+
+**2439**
+
+`r colFmt("*Plotting distribtution of rRNA in both trimmed libraries for 31_4F_fox-R1/R2 reads*", 'green')`
+
+```{r echo=FALSE}
+poly_T_counts_31 <- c(7617,2439)
+poly_A_counts_31 <- c(940,2124)
+
+counts_31 <- as.data.frame(cbind(poly_T_counts_31, poly_A_counts_31))
+
+poly_T_counts_8 <- c(103366,24287)
+poly_A_counts_8 <- c(11395,32969)
+
+counts_8 <- as.data.frame(cbind(poly_A_counts_8, poly_T_counts_8))
+
+
+
+par(mfrow=c(1,2))
+barplot(counts_31$poly_A_counts_31, col = c("steel blue","green"), main = "31_4F_fox - Poly-A-frequency", name = c('R1','R2'))
+barplot(counts_31$poly_T_counts_31, col = c("steel blue","green"), main = "31_4F_fox - Poly-T-frequency ", name = c('R1','R2'))
+```
+
+
+*Library for 8_2F_fox_trimmed files*
+
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_8_2F_fox_R1_001.fastq | grep "AAAAAAAAAAAAAAAAAAAAAAA" | wc -l
+
+**11395**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_8_2F_fox_R2_001.fastq | grep "AAAAAAAAAAAAAAAAAAAAAAA" | wc -l
+
+**32969**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_8_2F_fox_R1_001.fastq | grep "TTTTTTTTTTTTTTTTTTTTTTT" | wc -l
+
+**103366**
+
+[daned@ln1 ps1]$ awk 'NR % 4 == 2' trimmed_8_2F_fox_R2_001.fastq | grep "TTTTTTTTTTTTTTTTTTTTTTT" | wc -l
+
+**24287**
+
+
+
+`r colFmt("*Plotting distribtution of rRNA in both trimmed libraries for 8_2F_fox-R1/R2 reads*", 'green')`
+```{r echo=FALSE}
+par(mfrow=c(1,2))
+barplot(counts_8$poly_A_counts_8, col = c("dark blue","red"), main = "8_2F_fox - Poly-A-frequency", name = c('R1','R2'))
+barplot(counts_8$poly_T_counts_8, col = c("dark blue","red"), main = "8_2F_fox - Poly-T-frequency", name = c('R1','R2'))
+```
+
+
+As you see from the figures above, there is a constant trend with regards to the abundance of Poly-A tails and Poly-T tails found in both reads of the library datasets. The 8_2F_fox data set showed a far greater number of poly-A sequences in R2 than in R1, and the inverse of that for Poly-T sequences. The same is shown in the 31_4F_fox data set but with substentially less counts total compared to the other library data set.
+
