@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --partition=gpu
+#SBATCH --job-name=8_gsnap
+#SBATCH --output=8_gsnap.out
+#SBATCH --error=8_gsnap.err
+#SBATCH --time=0-08:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=28
+#SBATCH --mail-user=daned@uoregon.edu
+#SBATCH --mail-type=all
+
+module use /projects/ebb/modules/all/Core
+module load gmap-gsnap/2017-09-11
+
+gsnap -D /home/daned/bi624/ps1/gsnap -d mouse1 -B 4 -m 20 -t 8 -N 1 --no-sam-headers -O 
+--split-output gsnap_out_8_2F_R1 -A sam /home/daned/bi624/ps1/trimmed_8_2F_fox_R1_001.fastq
+
+
+gsnap -D /home/daned/bi624/ps1/gsnap -d mouse1 -B 4 -m 20 -t 8 -N 1 --no-sam-headers -O 
+--split-output gsnap_out_8_2F_R2 -A sam /home/daned/bi624/ps1/trimmed_8_2F_fox_R2_001.fastq
+
+
+gsnap -D /home/daned/bi624/ps1/gsnap -d mouse1 -B 4 -m 20 -t 8 -N 1 --no-sam-headers -O 
+--split-output gsnap_out_31_4F_R1 -A sam /home/daned/bi624/ps1/trimmed_31_4F_fox_R1_001.fastq
+
+
+gsnap -D /home/daned/bi624/ps1/gsnap -d mouse1 -B 4 -m 20 -t 8 -N 1 --no-sam-headers -O 
+--split-output gsnap_out_31_4F_R2 -A sam /home/daned/bi624/ps1/trimmed_31_4F_fox_R2_001.fastq
